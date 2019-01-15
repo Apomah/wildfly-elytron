@@ -44,7 +44,7 @@ import org.wildfly.common.iteration.CodePointIterator;
 import org.wildfly.security.credential.Credential;
 import org.wildfly.security.credential.PasswordCredential;
 import org.wildfly.security.credential.SecretKeyCredential;
-import org.wildfly.security.credential.source.CredentialSource;
+import org.wildfly.security.credential.source.impl.CredentialSource;
 import org.wildfly.security.credential.store.CredentialStore;
 import org.wildfly.security.credential.store.CredentialStoreException;
 import org.wildfly.security.credential.store.CredentialStoreSpi;

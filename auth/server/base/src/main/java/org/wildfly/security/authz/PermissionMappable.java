@@ -22,7 +22,7 @@ import java.security.Principal;
 import java.time.Instant;
 
 import org.wildfly.security.auth.principal.AnonymousPrincipal;
-import org.wildfly.security.auth.server.IdentityCredentials;
+import org.wildfly.security.credential.source.impl.IdentityCredentials;
 
 /**
  * An entity to which permissions can be mapped.

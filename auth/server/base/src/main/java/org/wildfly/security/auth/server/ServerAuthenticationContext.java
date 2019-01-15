@@ -75,7 +75,8 @@ import org.wildfly.security.auth.server.event.SecurityAuthenticationSuccessfulEv
 import org.wildfly.security.authz.AuthorizationIdentity;
 import org.wildfly.security.credential.Credential;
 import org.wildfly.security.credential.PasswordCredential;
-import org.wildfly.security.credential.source.CredentialSource;
+import org.wildfly.security.credential.source.impl.CredentialSource;
+import org.wildfly.security.credential.source.impl.IdentityCredentials;
 import org.wildfly.security.evidence.AlgorithmEvidence;
 import org.wildfly.security.evidence.Evidence;
 import org.wildfly.security.evidence.X509PeerCertificateChainEvidence;

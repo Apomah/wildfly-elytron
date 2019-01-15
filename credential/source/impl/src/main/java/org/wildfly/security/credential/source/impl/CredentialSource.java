@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.wildfly.security.credential.source;
+package org.wildfly.security.credential.source.impl;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -27,8 +27,6 @@ import org.wildfly.common.Assert;
 import org.wildfly.security.OneTimeSecurityFactory;
 import org.wildfly.security.SecurityFactory;
 import org.wildfly.security.auth.SupportLevel;
-import org.wildfly.security.auth.server.IdentityCredentials;
-import org.wildfly.security.auth.server._private.ElytronMessages;
 import org.wildfly.security.credential.Credential;
 import org.wildfly.security.key.KeyUtil;
 
@@ -37,7 +35,6 @@ import org.wildfly.security.key.KeyUtil;
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
-@Deprecated
 public interface CredentialSource {
 
     /**

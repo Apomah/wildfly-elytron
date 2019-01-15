@@ -59,6 +59,7 @@ import org.wildfly.security.authz.PermissionMappable;
 import org.wildfly.security.authz.RoleMapper;
 import org.wildfly.security.authz.Roles;
 import org.wildfly.security.credential.Credential;
+import org.wildfly.security.credential.source.impl.IdentityCredentials;
 import org.wildfly.security.permission.ElytronPermission;
 import org.wildfly.security.permission.PermissionVerifier;
 

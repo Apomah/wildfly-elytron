@@ -35,7 +35,7 @@ import java.util.function.Function;
 
 import org.wildfly.security.SecurityFactory;
 import org.wildfly.security.credential.Credential;
-import org.wildfly.security.credential.source.CredentialSource;
+import org.wildfly.security.credential.source.impl.CredentialSource;
 
 /**
  * A configuration that applies to an authentication mechanism.

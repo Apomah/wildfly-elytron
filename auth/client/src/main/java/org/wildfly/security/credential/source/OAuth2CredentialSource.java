@@ -54,6 +54,7 @@ import org.wildfly.security.auth.client.AuthenticationContext;
 import org.wildfly.security.auth.client.AuthenticationContextConfigurationClient;
 import org.wildfly.security.credential.BearerTokenCredential;
 import org.wildfly.security.credential.Credential;
+import org.wildfly.security.credential.source.impl.CredentialSource;
 
 /**
  * A {@link CredentialSource} capable of authenticating against a OAuth2 compliant authorization server and obtaining

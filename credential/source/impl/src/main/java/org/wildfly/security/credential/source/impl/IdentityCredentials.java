@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.wildfly.security.auth.server;
+package org.wildfly.security.credential.source.impl;
 
 import static org.wildfly.common.math.HashMath.multiHashOrdered;
 
@@ -35,7 +35,6 @@ import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
 
 import org.wildfly.common.Assert;
-import org.wildfly.security.credential.source.impl.CredentialSource;
 import org.wildfly.security.auth.SupportLevel;
 import org.wildfly.security.credential.AlgorithmCredential;
 import org.wildfly.security.credential.Credential;
@@ -50,7 +49,6 @@ import org.wildfly.security.util.EnumerationIterator;
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
-@Deprecated
 public abstract class IdentityCredentials implements Iterable<Credential>, CredentialSource {
     IdentityCredentials() {
     }
@@ -372,7 +370,7 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
 
         public IdentityCredentials withCredential(final Credential credential) {
             Assert.checkNotNullParam("credential", credential);
-            return new One(credential);
+            return new IdentityCredentials.One(credential);
         }
 
         public CredentialSource with(final CredentialSource other) {
@@ -445,9 +443,9 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
         public IdentityCredentials withCredential(final Credential credential) {
             Assert.checkNotNullParam("credential", credential);
             if (this.credential.matches(credential)) {
-                return new One(credential);
+                return new IdentityCredentials.One(credential);
             } else {
-                return new Two(this.credential, credential);
+                return new IdentityCredentials.Two(this.credential, credential);
             }
         }
 
@@ -455,8 +453,8 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
             Assert.checkNotNullParam("other", other);
             if (other == NONE) {
                 return this;
-            } else if (other instanceof One) {
-                return withCredential(((One) other).credential);
+            } else if (other instanceof IdentityCredentials.One) {
+                return withCredential(((IdentityCredentials.One) other).credential);
             } else {
                 return other.with(this);
             }
@@ -509,7 +507,7 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
         }
 
         public boolean equals(final Object obj) {
-            return obj instanceof One && ((One) obj).credential.equals(credential);
+            return obj instanceof IdentityCredentials.One && ((IdentityCredentials.One) obj).credential.equals(credential);
         }
     }
 
@@ -536,11 +534,11 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
         public IdentityCredentials withCredential(final Credential credential) {
             Assert.checkNotNullParam("credential", credential);
             if (credential.matches(credential1)) {
-                return new Two(credential2, credential);
+                return new IdentityCredentials.Two(credential2, credential);
             } else if (credential.matches(credential2)) {
-                return new Two(credential1, credential);
+                return new IdentityCredentials.Two(credential1, credential);
             } else {
-                return new Many(credential1, credential2, credential);
+                return new IdentityCredentials.Many(credential1, credential2, credential);
             }
         }
 
@@ -548,23 +546,23 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
             Assert.checkNotNullParam("other", other);
             if (other == NONE) {
                 return this;
-            } else if (other instanceof One) {
-                return withCredential(((One) other).credential);
-            } else if (other instanceof Two) {
-                final Two otherTwo = (Two) other;
+            } else if (other instanceof IdentityCredentials.One) {
+                return withCredential(((IdentityCredentials.One) other).credential);
+            } else if (other instanceof IdentityCredentials.Two) {
+                final IdentityCredentials.Two otherTwo = (IdentityCredentials.Two) other;
                 return withCredential(otherTwo.credential1).withCredential(otherTwo.credential2);
-            } else if (other instanceof Many) {
-                Many otherMany = (Many) other;
+            } else if (other instanceof IdentityCredentials.Many) {
+                IdentityCredentials.Many otherMany = (IdentityCredentials.Many) other;
                 if (otherMany.containsMatching(credential1)) {
                     if (otherMany.containsMatching(credential2)) {
                         return otherMany;
                     } else {
-                        return new Many(credential2, otherMany);
+                        return new IdentityCredentials.Many(credential2, otherMany);
                     }
                 } else if (otherMany.containsMatching(credential2)) {
-                    return new Many(credential1, otherMany);
+                    return new IdentityCredentials.Many(credential1, otherMany);
                 } else {
-                    return new Many(credential1, credential2, otherMany);
+                    return new IdentityCredentials.Many(credential1, credential2, otherMany);
                 }
             } else {
                 throw Assert.unreachableCode();
@@ -601,7 +599,7 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
 
         public IdentityCredentials without(final Predicate<? super Credential> predicate) {
             Assert.checkNotNullParam("predicate", predicate);
-            return predicate.test(credential1) ? predicate.test(credential2) ? NONE : new One(credential2) : predicate.test(credential2) ? new One(credential1) : this;
+            return predicate.test(credential1) ? predicate.test(credential2) ? NONE : new IdentityCredentials.One(credential2) : predicate.test(credential2) ? new IdentityCredentials.One(credential1) : this;
         }
 
         public void forEach(final Consumer<? super Credential> action) {
@@ -619,10 +617,10 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
         }
 
         public boolean equals(final Object obj) {
-            if (! (obj instanceof Two)) {
+            if (! (obj instanceof IdentityCredentials.Two)) {
                 return false;
             }
-            final Two two = (Two) obj;
+            final IdentityCredentials.Two two = (IdentityCredentials.Two) obj;
             return credential1.equals(two.credential1) && credential2.equals(two.credential2) || credential1.equals(two.credential2) && credential2.equals(two.credential1);
         }
     }
@@ -644,12 +642,12 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
     }
 
     static class Many extends IdentityCredentials {
-        private final LinkedHashMap<Key, Credential> map;
+        private final LinkedHashMap<IdentityCredentials.Key, Credential> map;
         private final int hashCode;
 
-        Many(final Credential c1, final Many subsequent) {
-            LinkedHashMap<Key, Credential> map = new LinkedHashMap<>(subsequent.map.size() + 1);
-            map.put(Key.of(c1), c1);
+        Many(final Credential c1, final IdentityCredentials.Many subsequent) {
+            LinkedHashMap<IdentityCredentials.Key, Credential> map = new LinkedHashMap<>(subsequent.map.size() + 1);
+            map.put(IdentityCredentials.Key.of(c1), c1);
             map.putAll(subsequent.map);
             this.map = map;
             int hc = 0;
@@ -660,10 +658,10 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
             assert size() > 2;
         }
 
-        Many(final Credential c1, final Credential c2, final Many subsequent) {
-            LinkedHashMap<Key, Credential> map = new LinkedHashMap<>(subsequent.map.size() + 2);
-            map.put(Key.of(c1), c1);
-            map.put(Key.of(c2), c2);
+        Many(final Credential c1, final Credential c2, final IdentityCredentials.Many subsequent) {
+            LinkedHashMap<IdentityCredentials.Key, Credential> map = new LinkedHashMap<>(subsequent.map.size() + 2);
+            map.put(IdentityCredentials.Key.of(c1), c1);
+            map.put(IdentityCredentials.Key.of(c2), c2);
             map.putAll(subsequent.map);
             this.map = map;
             int hc = 0;
@@ -674,7 +672,7 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
             assert size() > 2;
         }
 
-        Many(final LinkedHashMap<Key, Credential> map) {
+        Many(final LinkedHashMap<IdentityCredentials.Key, Credential> map) {
             this.map = map;
             int hc = 0;
             for (Credential credential : map.values()) {
@@ -685,10 +683,10 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
         }
 
         Many(final Credential credential1, final Credential credential2, final Credential credential3) {
-            LinkedHashMap<Key, Credential> map = new LinkedHashMap<>(3);
-            map.put(Key.of(credential1), credential1);
-            map.put(Key.of(credential2), credential2);
-            map.put(Key.of(credential3), credential3);
+            LinkedHashMap<IdentityCredentials.Key, Credential> map = new LinkedHashMap<>(3);
+            map.put(IdentityCredentials.Key.of(credential1), credential1);
+            map.put(IdentityCredentials.Key.of(credential2), credential2);
+            map.put(IdentityCredentials.Key.of(credential3), credential3);
             this.map = map;
             int hc = 0;
             for (Credential credential : map.values()) {
@@ -699,23 +697,23 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
         }
 
         public boolean contains(final Class<? extends Credential> credentialType, final String algorithmName, final AlgorithmParameterSpec parameterSpec) {
-            return map.containsKey(new Key(credentialType, algorithmName, parameterSpec));
+            return map.containsKey(new IdentityCredentials.Key(credentialType, algorithmName, parameterSpec));
         }
 
         public <C extends Credential> C getCredential(final Class<C> credentialType, final String algorithmName, final AlgorithmParameterSpec parameterSpec) {
-            return credentialType.cast(map.get(new Key(credentialType, algorithmName, parameterSpec)).clone());
+            return credentialType.cast(map.get(new IdentityCredentials.Key(credentialType, algorithmName, parameterSpec)).clone());
         }
 
         public IdentityCredentials withoutMatching(final Credential credential) {
-            final Key key = Key.of(credential);
+            final IdentityCredentials.Key key = IdentityCredentials.Key.of(credential);
             if (map.containsKey(key)) {
-                final LinkedHashMap<Key, Credential> clone = new LinkedHashMap<>(map);
+                final LinkedHashMap<IdentityCredentials.Key, Credential> clone = new LinkedHashMap<>(map);
                 clone.remove(key);
                 if (clone.size() == 2) {
                     final Iterator<Credential> iterator = clone.values().iterator();
-                    return new Two(iterator.next(), iterator.next());
+                    return new IdentityCredentials.Two(iterator.next(), iterator.next());
                 } else {
-                    return new Many(clone);
+                    return new IdentityCredentials.Many(clone);
                 }
             } else {
                 return this;
@@ -731,22 +729,22 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
         }
 
         public IdentityCredentials withCredential(final Credential credential) {
-            final LinkedHashMap<Key, Credential> clone = new LinkedHashMap<>(map);
-            final Key key = Key.of(credential);
+            final LinkedHashMap<IdentityCredentials.Key, Credential> clone = new LinkedHashMap<>(map);
+            final IdentityCredentials.Key key = IdentityCredentials.Key.of(credential);
             // do this as two steps so it's added to the end
             clone.remove(key);
             clone.put(key, credential);
-            return new Many(clone);
+            return new IdentityCredentials.Many(clone);
         }
 
         public IdentityCredentials with(final IdentityCredentials other) {
-            final LinkedHashMap<Key, Credential> clone = new LinkedHashMap<>(map);
+            final LinkedHashMap<IdentityCredentials.Key, Credential> clone = new LinkedHashMap<>(map);
             for (Credential credential : other) {
-                final Key key = Key.of(credential);
+                final IdentityCredentials.Key key = IdentityCredentials.Key.of(credential);
                 clone.remove(key);
                 clone.put(key, credential);
             }
-            return new Many(clone);
+            return new IdentityCredentials.Many(clone);
         }
 
         public CredentialSource with(final CredentialSource other) {
@@ -758,7 +756,7 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
         }
 
         public <C extends Credential, R> R applyToCredential(final Class<C> credentialType, final String algorithmName, final AlgorithmParameterSpec parameterSpec, final Function<C, R> function) {
-            final Key key = new Key(credentialType, algorithmName, parameterSpec);
+            final IdentityCredentials.Key key = new IdentityCredentials.Key(credentialType, algorithmName, parameterSpec);
             final Credential credential = map.get(key);
             if (credential != null) {
                 return function.apply(credentialType.cast(credential));
@@ -767,7 +765,7 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
         }
 
         public IdentityCredentials without(final Predicate<? super Credential> predicate) {
-            final LinkedHashMap<Key, Credential> clone = new LinkedHashMap<>(map);
+            final LinkedHashMap<IdentityCredentials.Key, Credential> clone = new LinkedHashMap<>(map);
             final Collection<Credential> values = clone.values();
             values.removeIf(predicate);
             final Iterator<Credential> iterator = values.iterator();
@@ -776,12 +774,12 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
                 if (iterator.hasNext()) {
                     final Credential c2 = iterator.next();
                     if (iterator.hasNext()) {
-                        return new Many(clone);
+                        return new IdentityCredentials.Many(clone);
                     } else {
-                        return new Two(c1, c2);
+                        return new IdentityCredentials.Two(c1, c2);
                     }
                 } else {
-                    return new One(c1);
+                    return new IdentityCredentials.One(c1);
                 }
             } else {
                 return NONE;
@@ -793,10 +791,10 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
         }
 
         public boolean equals(final Object obj) {
-            if (! (obj instanceof Many)) {
+            if (! (obj instanceof IdentityCredentials.Many)) {
                 return false;
             }
-            Many many = (Many) obj;
+            IdentityCredentials.Many many = (IdentityCredentials.Many) obj;
             // check is potentially expensive so start here
             if (hashCode != many.hashCode) {
                 return false;
@@ -805,7 +803,7 @@ public abstract class IdentityCredentials implements Iterable<Credential>, Crede
                 return false;
             }
             // now the O(n) part
-            for (Map.Entry<Key, Credential> entry : map.entrySet()) {
+            for (Map.Entry<IdentityCredentials.Key, Credential> entry : map.entrySet()) {
                 if (! Objects.equals(many.map.get(entry.getKey()), entry.getValue())) {
                     return false;
                 }

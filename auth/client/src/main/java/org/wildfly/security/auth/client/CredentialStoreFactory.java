@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 import org.wildfly.client.config.ConfigXMLParseException;
 import org.wildfly.client.config.XMLLocation;
 import org.wildfly.common.function.ExceptionSupplier;
-import org.wildfly.security.credential.source.CredentialSource;
+import org.wildfly.security.credential.source.impl.CredentialSource;
 import org.wildfly.security.credential.store.CredentialStore;
 import org.wildfly.security.credential.store.impl.KeyStoreCredentialStore;
 

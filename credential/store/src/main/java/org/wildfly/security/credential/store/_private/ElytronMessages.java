@@ -47,6 +47,8 @@ public interface ElytronMessages extends BasicLogger {
 
     ElytronMessages log = Logger.getMessageLogger(ElytronMessages.class, "org.wildfly.security");
 
+    @Message(id = 1030, value = "Unable to read credential")
+    IOException unableToReadCredential(@Cause Exception e);
     // Duplicated in wildfly-elytron-credential
     @Message(id = 2009, value = "Unable to create a new KeyStore instance")
     IOException unableToCreateKeyStore(@Cause Exception cause);

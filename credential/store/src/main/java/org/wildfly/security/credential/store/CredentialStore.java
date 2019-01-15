@@ -32,7 +32,7 @@ import java.util.function.Supplier;
 
 import org.wildfly.common.Assert;
 import org.wildfly.security.credential.Credential;
-import org.wildfly.security.credential.source.CredentialSource;
+import org.wildfly.security.credential.source.impl.CredentialSource;
 
 /**
  * This class represents credential store functionality.

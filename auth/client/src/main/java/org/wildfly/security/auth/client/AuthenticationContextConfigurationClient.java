@@ -44,9 +44,9 @@ import javax.security.sasl.SaslException;
 import org.wildfly.common.Assert;
 import org.wildfly.security.SecurityFactory;
 import org.wildfly.security.auth.principal.AnonymousPrincipal;
-import org.wildfly.security.auth.server.IdentityCredentials;
 import org.wildfly.security.auth.server.SecurityDomain;
 import org.wildfly.security.auth.server.SecurityIdentity;
+import org.wildfly.security.credential.source.impl.IdentityCredentials;
 import org.wildfly.security.permission.ElytronPermission;
 
 /**

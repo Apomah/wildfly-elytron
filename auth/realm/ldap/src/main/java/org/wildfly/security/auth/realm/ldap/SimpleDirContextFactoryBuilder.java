@@ -26,7 +26,7 @@ import org.wildfly.security.auth.client.AuthenticationConfiguration;
 import org.wildfly.security.auth.client.AuthenticationContext;
 import org.wildfly.security.auth.client.AuthenticationContextConfigurationClient;
 import org.wildfly.security.credential.PasswordCredential;
-import org.wildfly.security.credential.source.CredentialSource;
+import org.wildfly.security.credential.source.impl.CredentialSource;
 import org.wildfly.security.manager.WildFlySecurityManager;
 import org.wildfly.security.manager.action.GetModuleClassLoaderAction;
 import org.wildfly.security.password.interfaces.ClearPassword;
@@ -150,7 +150,7 @@ public class SimpleDirContextFactoryBuilder {
     /**
      * Set the authentication credential.
      * If not set, factory try to obtain it from {@link CredentialSource} specified by
-     * {@link #setCredentialSource(org.wildfly.security.credential.source.CredentialSource)} of from
+     * {@link #setCredentialSource(org.wildfly.security.credential.source.impl.CredentialSource)} of from
      * {@link AuthenticationContext} specified by {@link #setAuthenticationContext(AuthenticationContext)}.
      *
      * @param securityCredential the credential
