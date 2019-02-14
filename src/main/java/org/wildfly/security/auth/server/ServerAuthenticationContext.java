@@ -28,6 +28,7 @@ import java.security.cert.X509Certificate;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -1033,7 +1034,15 @@ public final class ServerAuthenticationContext implements AutoCloseable {
                     ((SecurityIdentityCallback) callback).setSecurityIdentity(identity);
                     handleOne(callbacks, idx + 1);
                 } else if (callback instanceof AvailableRealmsCallback) {
-                    Collection<String> names = stateRef.get().getMechanismConfiguration().getMechanismRealmNames();
+                    State state = stateRef.get();
+                    MechanismConfiguration configuration = state.getMechanismConfiguration();
+                    Collection<String> names;
+                    if (configuration != null) {
+                        names = configuration.getMechanismRealmNames();
+                    } else {
+                        names = Collections.emptyList();
+                    }
+                    //Collection<String> names = stateRef.get().getMechanismConfiguration().getMechanismRealmNames();
                     if (log.isTraceEnabled()) {
                         log.tracef("Handling AvailableRealmsCallback: realms = [%s]", String.join(", ", names));
                     }
@@ -1425,7 +1434,12 @@ public final class ServerAuthenticationContext implements AutoCloseable {
         }
 
         private InitialState selectMechanismConfiguration() {
-            MechanismConfiguration mechanismConfiguration = mechanismConfigurationSelector.selectConfiguration(mechanismInformation);
+            MechanismConfiguration mechanismConfiguration = null;
+            if (mechanismConfigurationSelector != null) {
+                mechanismConfiguration = mechanismConfigurationSelector.selectConfiguration(mechanismInformation);
+            } else {
+                return new InitialState(capturedIdentity, null, null, privateCredentials, publicCredentials);
+            }
             if (mechanismConfiguration == null) {
                 throw log.unableToSelectMechanismConfiguration(mechanismInformation.getMechanismType(),
                         mechanismInformation.getMechanismName(), mechanismInformation.getHostName(),
