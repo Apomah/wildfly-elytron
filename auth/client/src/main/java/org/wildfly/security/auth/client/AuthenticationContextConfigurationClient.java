@@ -47,6 +47,7 @@ import org.wildfly.security.auth.principal.AnonymousPrincipal;
 import org.wildfly.security.auth.server.IdentityCredentials;
 import org.wildfly.security.auth.server.SecurityDomain;
 import org.wildfly.security.auth.server.SecurityIdentity;
+import org.wildfly.security.auth.client._private.RuleNode;
 import org.wildfly.security.permission.ElytronPermission;
 
 /**

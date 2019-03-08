@@ -16,61 +16,7 @@
  * limitations under the License.
  */
 
-package org.wildfly.security.auth.client;
-
-import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
-import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
-import static org.wildfly.common.Assert.checkMinimumParameter;
-import static org.wildfly.common.Assert.checkNotNullParam;
-import static org.wildfly.security.auth.client.ElytronMessages.xmlLog;
-import static org.wildfly.security.provider.util.ProviderUtil.INSTALLED_PROVIDERS;
-import static org.wildfly.security.provider.util.ProviderUtil.findProvider;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.Authenticator;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.security.KeyPair;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.ServiceConfigurationError;
-import java.util.ServiceLoader;
-import java.util.function.IntFunction;
-import java.util.function.Supplier;
-import java.util.regex.Pattern;
-
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.SecretKeySpec;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509ExtendedKeyManager;
-import javax.net.ssl.X509TrustManager;
-import javax.xml.stream.Location;
+package org.wildfly.security.parsing;
 
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.Oid;
@@ -83,30 +29,18 @@ import org.wildfly.common.function.ExceptionBiFunction;
 import org.wildfly.common.function.ExceptionSupplier;
 import org.wildfly.common.function.ExceptionUnaryOperator;
 import org.wildfly.common.iteration.CodePointIterator;
-import org.wildfly.security.FixedSecurityFactory;
-import org.wildfly.security.SecurityFactory;
+import org.wildfly.security.*;
 import org.wildfly.security.asn1.OidsUtil;
+import org.wildfly.security.auth.client.*;
+import org.wildfly.security.auth.client._private.RuleNode;
 import org.wildfly.security.auth.server.IdentityCredentials;
 import org.wildfly.security.auth.server.NameRewriter;
 import org.wildfly.security.auth.util.ElytronAuthenticator;
 import org.wildfly.security.auth.util.RegexNameRewriter;
-import org.wildfly.security.auth.client._private.RuleNode;
-import org.wildfly.security.credential.BearerTokenCredential;
-import org.wildfly.security.credential.KeyPairCredential;
-import org.wildfly.security.credential.PasswordCredential;
-import org.wildfly.security.credential.PublicKeyCredential;
-import org.wildfly.security.credential.X509CertificateChainPrivateCredential;
-import org.wildfly.security.credential.source.CredentialSource;
-import org.wildfly.security.credential.source.CredentialStoreCredentialSource;
-import org.wildfly.security.credential.source.KeyStoreCredentialSource;
-import org.wildfly.security.credential.source.LocalKerberosCredentialSource;
-import org.wildfly.security.credential.source.OAuth2CredentialSource;
+import org.wildfly.security.credential.*;
+import org.wildfly.security.credential.source.*;
 import org.wildfly.security.credential.store.CredentialStore;
-import org.wildfly.security.keystore.AliasFilter;
-import org.wildfly.security.keystore.FilteringKeyStore;
-import org.wildfly.security.keystore.KeyStoreUtil;
-import org.wildfly.security.keystore.PasswordEntry;
-import org.wildfly.security.keystore.WrappingPasswordKeyStore;
+import org.wildfly.security.keystore.*;
 import org.wildfly.security.mechanism.gssapi.GSSCredentialSecurityFactory;
 import org.wildfly.security.password.Password;
 import org.wildfly.security.password.PasswordFactory;
@@ -114,15 +48,44 @@ import org.wildfly.security.password.interfaces.ClearPassword;
 import org.wildfly.security.password.spec.ClearPasswordSpec;
 import org.wildfly.security.pem.Pem;
 import org.wildfly.security.pem.PemEntry;
-import org.wildfly.security.provider.util.ProviderFactory;
-import org.wildfly.security.provider.util.ProviderServiceLoaderSupplier;
-import org.wildfly.security.provider.util.ProviderUtil;
 import org.wildfly.security.sasl.SaslMechanismSelector;
 import org.wildfly.security.sasl.util.ServiceLoaderSaslClientFactory;
 import org.wildfly.security.ssl.CipherSuiteSelector;
 import org.wildfly.security.ssl.ProtocolSelector;
 import org.wildfly.security.ssl.SSLContextBuilder;
 import org.wildfly.security.ssl.X509CRLExtendedTrustManager;
+import org.wildfly.security.util.ProviderServiceLoaderSupplier;
+import org.wildfly.security.util.ProviderUtil;
+
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.SecretKeySpec;
+import javax.net.ssl.*;
+import javax.xml.stream.Location;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Authenticator;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.util.*;
+import java.util.function.IntFunction;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
+
+import static java.lang.System.getSecurityManager;
+import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
+import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
+import static org.wildfly.common.Assert.checkMinimumParameter;
+import static org.wildfly.common.Assert.checkNotNullParam;
+import static org.wildfly.security.parsing.ElytronMessages.xmlLog;
+import static org.wildfly.security.util.ProviderUtil.INSTALLED_PROVIDERS;
+import static org.wildfly.security.util.ProviderUtil.findProvider;
 
 /**
  * A parser for the Elytron XML schema.
@@ -131,9 +94,35 @@ import org.wildfly.security.ssl.X509CRLExtendedTrustManager;
  */
 public final class ElytronXmlParser {
 
-    private static final Supplier<Provider[]> ELYTRON_PROVIDER_SUPPLIER = ProviderFactory.getElytronProviderSupplier(ElytronXmlParser.class.getClassLoader());
+    private static final Supplier<Provider[]> ELYTRON_PROVIDER_SUPPLIER = ProviderUtil.aggregate(
+            () -> getSecurityManager() != null ?
+                    AccessController.doPrivileged((PrivilegedAction<Provider[]>) () -> getWildFlyElytronProviders()) :
+                    getWildFlyElytronProviders(),
+            getSecurityManager() != null ?
+                    AccessController.doPrivileged((PrivilegedAction<ProviderServiceLoaderSupplier>) () -> new ProviderServiceLoaderSupplier(ElytronXmlParser.class.getClassLoader(), true)) :
+                    new ProviderServiceLoaderSupplier(ElytronXmlParser.class.getClassLoader(), true));
 
     private static final Supplier<Provider[]> DEFAULT_PROVIDER_SUPPLIER = ProviderUtil.aggregate(ELYTRON_PROVIDER_SUPPLIER, INSTALLED_PROVIDERS);
+
+    private static Provider[] getWildFlyElytronProviders() {
+        return new Provider[] {
+                WildFlyElytronPasswordProvider.getInstance(),
+                WildFlyElytronCredentialStoreProvider.getInstance(),
+                WildFlyElytronKeyProvider.getInstance(),
+                WildFlyElytronKeyStoreProvider.getInstance(),
+                WildFlyElytronSaslAnonymousProvider.getInstance(),
+                WildFlyElytronSaslDigestProvider.getInstance(),
+                WildFlyElytronSaslEntityProvider.getInstance(),
+                WildFlyElytronSaslExternalProvider.getInstance(),
+                WildFlyElytronSaslGs2Provider.getInstance(),
+                WildFlyElytronSaslGssapiProvider.getInstance(),
+                WildFlyElytronSaslLocalUserProvider.getInstance(),
+                WildFlyElytronSaslOAuth2Provider.getInstance(),
+                WildFlyElytronSaslOTPProvider.getInstance(),
+                WildFlyElytronSaslPlainProvider.getInstance(),
+                WildFlyElytronSaslScramProvider.getInstance()
+        };
+    }
 
     static final Map<String, Version> KNOWN_NAMESPACES;
 

@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-package org.wildfly.security.auth.client;
+package org.wildfly.security.auth.client._private;
 
-import static org.wildfly.security.auth.client.ElytronMessages.log;
+import static org.wildfly.security.auth.client._private.ElytronMessages.log;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -26,6 +26,7 @@ import java.net.URI;
 
 import org.wildfly.common.net.CidrAddress;
 import org.wildfly.common.net.Inet;
+import org.wildfly.security.auth.client.MatchSchemeRule;
 
 /**
  * A rule used for deciding which authentication configuration to use.

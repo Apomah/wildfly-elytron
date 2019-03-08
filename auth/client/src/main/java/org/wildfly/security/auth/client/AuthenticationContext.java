@@ -33,6 +33,7 @@ import org.wildfly.common.context.ContextManager;
 import org.wildfly.common.context.Contextual;
 import org.wildfly.common.function.ExceptionObjIntConsumer;
 import org.wildfly.common.function.ExceptionSupplier;
+import org.wildfly.security.auth.client._private.RuleNode;
 import org.wildfly.security.ParametricPrivilegedAction;
 import org.wildfly.security.ParametricPrivilegedExceptionAction;
 import org.wildfly.security.SecurityFactory;

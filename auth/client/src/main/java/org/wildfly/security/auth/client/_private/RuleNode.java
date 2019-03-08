@@ -16,35 +16,37 @@
  * limitations under the License.
  */
 
-package org.wildfly.security.auth.client;
+package org.wildfly.security.auth.client._private;
+
+import org.wildfly.security.auth.client.MatchRule;
 
 /**
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
-class RuleNode<T> {
+public class RuleNode<T> {
     final RuleNode<T> next;
     final MatchRule rule;
     final T configuration;
 
-    RuleNode(final RuleNode<T> next, final MatchRule rule, final T configuration) {
+    public RuleNode(final RuleNode<T> next, final MatchRule rule, final T configuration) {
         this.next = next;
         this.rule = rule;
         this.configuration = configuration;
     }
 
-    RuleNode<T> getNext() {
+    public RuleNode<T> getNext() {
         return next;
     }
 
-    MatchRule getRule() {
+    public MatchRule getRule() {
         return rule;
     }
 
-    T getConfiguration() {
+    public T getConfiguration() {
         return configuration;
     }
 
-    RuleNode<T> without(int idx) {
+    public RuleNode<T> without(int idx) {
         if (idx < 0) {
             throw new IndexOutOfBoundsException();
         }
@@ -58,7 +60,7 @@ class RuleNode<T> {
         return new RuleNode<T>(next.without(idx - 1), rule, configuration);
     }
 
-    RuleNode<T> with(MatchRule rule, T configuration, int idx) {
+    public RuleNode<T> with(MatchRule rule, T configuration, int idx) {
         if (idx < 0) {
             throw new IndexOutOfBoundsException();
         }
@@ -72,11 +74,11 @@ class RuleNode<T> {
         return new RuleNode<T>(next.with(rule, configuration, idx - 1), this.rule, this.configuration);
     }
 
-    RuleNode<T> with(final MatchRule rule, final T configuration) {
+    public RuleNode<T> with(final MatchRule rule, final T configuration) {
         return withAll(new RuleNode<T>(null, rule, configuration));
     }
 
-    RuleNode<T> withAll(RuleNode<T> other) {
+    public RuleNode<T> withAll(RuleNode<T> other) {
         final RuleNode<T> next = this.next;
         if (next == null) {
             return new RuleNode<T>(other, rule, configuration);
@@ -85,7 +87,7 @@ class RuleNode<T> {
         }
     }
 
-    RuleNode<T> withAll(final RuleNode<T> authRules, final int idx) {
+    public RuleNode<T> withAll(final RuleNode<T> authRules, final int idx) {
         if (idx < 0) {
             throw new IndexOutOfBoundsException();
         }
@@ -99,7 +101,7 @@ class RuleNode<T> {
         return new RuleNode<T>(next.withAll(authRules, idx - 1), rule, configuration);
     }
 
-    RuleNode<T> replacing(final MatchRule rule, final T configuration, final int idx) {
+    public RuleNode<T> replacing(final MatchRule rule, final T configuration, final int idx) {
         if (idx < 0) {
             throw new IndexOutOfBoundsException();
         }
