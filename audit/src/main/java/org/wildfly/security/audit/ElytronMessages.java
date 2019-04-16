@@ -17,6 +17,9 @@
  */
 package org.wildfly.security.audit;
 
+import java.io.IOException;
+import java.net.PortUnreachableException;
+
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
 import org.jboss.logging.annotations.Cause;
@@ -32,9 +35,9 @@ import org.jboss.logging.annotations.ValidIdRanges;
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:darran.lofthouse@jboss.com">Darran Lofthouse</a>
  */
-@MessageLogger(projectCode = "ELY", length = 5)
+@MessageLogger(projectCode = "ELY", length = 8)
 @ValidIdRanges({
-    @ValidIdRange(min = 11001, max = 11007)
+    @ValidIdRange(min = 11001, max = 11010)
 })
 interface ElytronMessages extends BasicLogger {
     ElytronMessages audit = Logger.getMessageLogger(ElytronMessages.class, "org.wildfly.security.audit");
@@ -60,4 +63,13 @@ interface ElytronMessages extends BasicLogger {
     @LogMessage(level = Logger.Level.FATAL)
     @Message(id = 11007, value = "Endpoint unable to accept SecurityEvent.")
     void unableToAcceptEvent(@Cause Throwable cause);
+
+    @Message(id = 11008, value = "The reconnect attempts value of %s is invalid. Please use an integer value >= -1.")
+    IllegalArgumentException badReconnectAttemptsNumber(int reconnectAttempts);
+
+    @Message(id = 11009, value = "The maximum reconnect attempts value of %s was reached.")
+    IOException syslogMaximumReconnectAttemptsReached(int reconnectAttempts);
+
+    @Message(id = 11010, value = "The configured UDP port is unavailable.")
+    PortUnreachableException udpPortUnavailable(@Cause Throwable cause);
 }
