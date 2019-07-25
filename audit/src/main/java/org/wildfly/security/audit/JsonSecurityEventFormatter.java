@@ -34,6 +34,7 @@ import org.wildfly.security.auth.server.event.SecurityDefiniteOutcomeEvent;
 import org.wildfly.security.auth.server.event.SecurityEvent;
 import org.wildfly.security.auth.server.event.SecurityEventVisitor;
 import org.wildfly.security.auth.server.event.SecurityPermissionCheckEvent;
+import org.wildfly.security.auth.server.event.SecurityPreAuthenticationEvent;
 import org.wildfly.security.auth.server.event.SyslogAuditEvent;
 
 /**
@@ -85,6 +86,23 @@ public class JsonSecurityEventFormatter extends SecurityEventVisitor<Void, Strin
     private void handleDefiniteOutcomeEvent(SecurityDefiniteOutcomeEvent event, JsonObjectBuilder objectBuilder) {
         handleUnknownEvent(event, objectBuilder);
         objectBuilder.add("success", event.isSuccessful());
+    }
+
+    @Override
+    public String handlePreAuthenticationEvent(SecurityPreAuthenticationEvent event, Void param) {
+        checkNotNullParam("event", event);
+        JsonObjectBuilder objectBuilder = jsonProvider.createObjectBuilder();
+        handlePreAuthenticationEvent(event, objectBuilder);
+        return objectBuilder.build().toString();
+    }
+
+    private void handlePreAuthenticationEvent(SecurityPreAuthenticationEvent event, JsonObjectBuilder objectBuilder) {
+        handleUnknownEvent(event, objectBuilder);
+        if (event.getPrincipal() != null && event.getPrincipal().toString() != null) {
+            objectBuilder.add("principal", event.getPrincipal().toString());
+        } else {
+            objectBuilder.addNull("principal");
+        }
     }
 
     @Override

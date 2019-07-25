@@ -31,6 +31,7 @@ import org.wildfly.security.auth.server.event.SecurityDefiniteOutcomeEvent;
 import org.wildfly.security.auth.server.event.SecurityEvent;
 import org.wildfly.security.auth.server.event.SecurityEventVisitor;
 import org.wildfly.security.auth.server.event.SecurityPermissionCheckEvent;
+import org.wildfly.security.auth.server.event.SecurityPreAuthenticationEvent;
 import org.wildfly.security.auth.server.event.SyslogAuditEvent;
 
 /**
@@ -77,6 +78,19 @@ public class SimpleSecurityEventFormatter extends SecurityEventVisitor<Void, Str
     private void handleDefiniteOutcomeEvent(SecurityDefiniteOutcomeEvent event, StringBuilder stringBuilder) {
         handleUnknownEvent(event, stringBuilder);
         stringBuilder.append(",success=").append(event.isSuccessful());
+    }
+
+    @Override
+    public String handlePreAuthenticationEvent(SecurityPreAuthenticationEvent event, Void param) {
+        checkNotNullParam("event", event);
+        StringBuilder stringBuilder = new StringBuilder("{");
+        handlePreAuthenticationEvent(event, stringBuilder);
+        return stringBuilder.append('}').toString();
+    }
+
+    private void handlePreAuthenticationEvent(SecurityPreAuthenticationEvent event, StringBuilder stringBuilder) {
+        handleUnknownEvent(event, stringBuilder);
+        stringBuilder.append(",principal=").append(event.getPrincipal() != null ? event.getPrincipal().toString() : null);
     }
 
     @Override

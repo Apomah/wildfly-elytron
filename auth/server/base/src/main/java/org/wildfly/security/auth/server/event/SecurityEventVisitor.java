@@ -53,6 +53,17 @@ public abstract class SecurityEventVisitor<P, R> {
     }
 
     /**
+     * Handle a security pre authentication event.
+     *
+     * @param event the security event
+     * @param param the visitor parameter
+     * @return the visitor return value
+     */
+    public R handlePreAuthenticationEvent(final SecurityPreAuthenticationEvent event, final P param) {
+        return handleUnknownEvent(event, param);
+    }
+
+    /**
      * Handle a security authentication event.
      *
      * @param event the security event

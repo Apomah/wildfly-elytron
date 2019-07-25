@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.FilePermission;
 import java.io.StringReader;
+import java.security.Principal;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -29,6 +30,7 @@ import javax.json.JsonReader;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.wildfly.security.auth.principal.AnonymousPrincipal;
 import org.wildfly.security.auth.realm.SimpleMapBackedSecurityRealm;
 import org.wildfly.security.auth.server.SecurityDomain;
 import org.wildfly.security.auth.server.event.Rfc3164SyslogEvent;
@@ -37,6 +39,7 @@ import org.wildfly.security.auth.server.event.SecurityAuthenticationSuccessfulEv
 import org.wildfly.security.auth.server.event.SecurityEvent;
 import org.wildfly.security.auth.server.event.SecurityEventVisitor;
 import org.wildfly.security.auth.server.event.SecurityPermissionCheckFailedEvent;
+import org.wildfly.security.auth.server.event.SecurityPreAuthenticationEvent;
 
 /**
  * Test case to test the JsonSecurityEventFormatter
@@ -48,6 +51,7 @@ public class JsonSecurityEventFormatterTest {
 
     private static SecurityEventVisitor<?, String> jsonFormatter;
     private static SecurityDomain securityDomain;
+    private static Principal principal = AnonymousPrincipal.getInstance();
 
     @BeforeClass
     public static void createDomain() {
@@ -89,6 +93,16 @@ public class JsonSecurityEventFormatterTest {
 
         assertEquals("Expected Event", "Rfc5424SyslogEvent", jsonObject.getString("event"));
         assertEquals("Expected Format", "RFC5424", jsonObject.getString("syslog-format"));
+    }
+
+    @Test
+    public void testPreAuthentication() {
+        JsonObject jsonObject = baseTest(new SecurityPreAuthenticationEvent(securityDomain.getCurrentSecurityIdentity(), principal));
+
+        assertEquals("Expected Event", "SecurityPreAuthenticationEvent", jsonObject.getString("event"));
+        assertEquals("Principal", "anonymous", jsonObject.getString("principal"));
+        JsonObject identity = jsonObject.getJsonObject("security-identity");
+        assertEquals("Identity Name", "anonymous", identity.getString("name"));
     }
 
     @Test
