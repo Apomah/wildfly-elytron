@@ -23,7 +23,7 @@ package org.wildfly.security.auth.server.event;
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
-public abstract class RealmEvent {
+public abstract class RealmEvent implements ElytronEvent {
 
     /**
      * Construct a new instance.

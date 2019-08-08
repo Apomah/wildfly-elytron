@@ -30,7 +30,7 @@ import org.wildfly.security.auth.server.SecurityIdentity;
  *
  * @author <a href="mailto:darran.lofthouse@jboss.com">Darran Lofthouse</a>
  */
-public abstract class SecurityEvent {
+public abstract class SecurityEvent implements ElytronEvent {
 
     private final Instant instant = Instant.now();
 

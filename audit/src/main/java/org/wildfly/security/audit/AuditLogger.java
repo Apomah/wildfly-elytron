@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.wildfly.common.function.ExceptionBiConsumer;
+import org.wildfly.security.auth.server.event.ElytronEvent;
 import org.wildfly.security.auth.server.event.SecurityEvent;
 
 /**
@@ -32,11 +33,11 @@ import org.wildfly.security.auth.server.event.SecurityEvent;
  *
  * @author <a href="mailto:darran.lofthouse@jboss.com">Darran Lofthouse</a>
  */
-public final class AuditLogger implements Consumer<SecurityEvent> {
+public final class AuditLogger implements Consumer<ElytronEvent> {
 
     private final ExceptionBiConsumer<EventPriority, String, IOException> auditEndpoint;
-    private final Function<SecurityEvent, EventPriority> priorityMapper;
-    private final Function<SecurityEvent, String> messageFormatter;
+    private final Function<ElytronEvent, EventPriority> priorityMapper;
+    private final Function<ElytronEvent, String> messageFormatter;
 
     AuditLogger(Builder builder) {
         auditEndpoint = checkNotNullParam("auditEndpoint", builder.auditEndpoint);
@@ -50,7 +51,7 @@ public final class AuditLogger implements Consumer<SecurityEvent> {
      * @param event security event to be processed
      */
     @Override
-    public void accept(SecurityEvent event) {
+    public void accept(ElytronEvent event) {
         try {
             EventPriority priority = priorityMapper.apply(event);
             if (priority == EventPriority.OFF)
@@ -82,8 +83,8 @@ public final class AuditLogger implements Consumer<SecurityEvent> {
     public static class Builder {
 
         private ExceptionBiConsumer<EventPriority, String, IOException> auditEndpoint;
-        private Function<SecurityEvent, EventPriority> priorityMapper;
-        private Function<SecurityEvent, String> messageFormatter;
+        private Function<ElytronEvent, EventPriority> priorityMapper;
+        private Function<ElytronEvent, String> messageFormatter;
 
         Builder() {
         }
@@ -106,7 +107,7 @@ public final class AuditLogger implements Consumer<SecurityEvent> {
          * @param priorityMapper the priority mapper to assign a priority to the messages.
          * @return this builder.
          */
-        public Builder setPriorityMapper(Function<SecurityEvent, EventPriority> priorityMapper) {
+        public Builder setPriorityMapper(Function<ElytronEvent, EventPriority> priorityMapper) {
             this.priorityMapper = checkNotNullParam("priorityMapper", priorityMapper);
 
             return this;
@@ -118,7 +119,7 @@ public final class AuditLogger implements Consumer<SecurityEvent> {
          * @param messageFormatter the message formatter to convert the messages to formatted Strings.
          * @return this builder.
          */
-        public Builder setMessageFormatter(Function<SecurityEvent, String> messageFormatter) {
+        public Builder setMessageFormatter(Function<ElytronEvent, String> messageFormatter) {
             this.messageFormatter = checkNotNullParam("messageFormatter", messageFormatter);
 
             return this;
@@ -129,7 +130,7 @@ public final class AuditLogger implements Consumer<SecurityEvent> {
          *
          * @return the built audit logger.
          */
-        public Consumer<SecurityEvent> build() {
+        public Consumer<ElytronEvent> build() {
             return new AuditLogger(this);
         }
 
